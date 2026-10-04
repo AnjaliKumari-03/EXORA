@@ -84,49 +84,7 @@ Preparing an online mock test usually means retyping hundreds of questions into 
 
 ---
 
-## 🔄 How it works
 
-```mermaid
-flowchart LR
-    A[Upload PDF / DOCX] --> B[Extract per-page text<br/>+ render page PNGs]
-    B --> C{AI extraction<br/>8-page batches x 3 concurrent}
-    C -->|Gemini| D[Normalize to uniform schema]
-    C -.->|exhausted| C2[Groq] -.->|exhausted| C3[Mistral]
-    C2 --> D
-    C3 --> D
-    C -.->|all AI failed| R[Regex fallback parser]
-    R --> D
-    D --> E[Review and edit studio<br/>sections, marks, images, timing]
-    E --> F[(MongoDB<br/>Exam)]
-    F --> G[Student attempts exam<br/>fullscreen + integrity monitor]
-    G --> H[Server-side grading]
-    H --> I[Result + insights<br/>owner dashboard]
-```
-
-### Attempt lifecycle
-
-```mermaid
-sequenceDiagram
-    participant S as Student (React)
-    participant API as Express API
-    participant DB as MongoDB
-
-    S->>API: POST /attempts/:examId/start
-    API->>DB: find in-progress attempt or create one (shuffled order saved)
-    API-->>S: sanitized exam (NO answer key) + saved answers
-    S->>S: Fullscreen gate and integrity monitor start
-    loop every interaction
-        S->>API: POST /attempts/:id/answer
-        S->>API: POST /attempts/:id/integrity (on strike)
-    end
-    S->>API: POST /attempts/:id/submit (manual / timer / 3 strikes)
-    API->>DB: close attempt, grade against real key, store Result
-    API-->>S: resultId
-    S->>API: GET /results/:resultId
-    API-->>S: scorecard + full review + insights
-```
-
----
 
 ## 🏗️ Architecture
 
@@ -234,75 +192,12 @@ npm run dev              # http://localhost:5173
 4. Click **Take exam**, enter fullscreen, and attempt it.
 5. Submit, then explore the scorecard, insights and the owner results overview.
 
-### Environment variables
 
-**`server/.env`**
 
-| Variable | Required | Description |
-|---|:---:|---|
-| `PORT` | – | API port (default `5000`) |
-| `CLIENT_URL` | ✅ | Allowed CORS origin, e.g. `http://localhost:5173` |
-| `MONGO_URI` | ✅ | MongoDB connection string |
-| `JWT_SECRET` | ✅ | Long random string used to sign tokens |
-| `GEMINI_API_KEY` | ✅ | Primary AI provider |
-| `GROQ_API_KEY` | – | Optional fallback tier 2 (skipped if empty) |
-| `MISTRAL_API_KEY` | – | Optional fallback tier 3 (skipped if empty) |
-
-**Client (build-time)**
-
-| Variable | Description |
-|---|---|
-| `VITE_API_URL` | API base URL, e.g. `https://api.example.com/api`. Defaults to `http://localhost:5000/api`. Vite inlines this at **build** time, so set it wherever `npm run build` runs. |
-
-### Scripts
-
-| Where | Command | What it does |
-|---|---|---|
-| `server` | `npm run dev` | Start with `node --watch` (auto-reload) |
-| `server` | `npm start` | Start for production |
-| `client` | `npm run dev` | Vite dev server |
-| `client` | `npm run build` | Production build to `dist/` |
-| `client` | `npm run preview` | Preview the production build |
 
 ---
 
-## 📡 API reference
 
-All routes except signup and login require `Authorization: Bearer <token>`.
-
-### Auth: `/api/auth`
-| Method | Route | Description |
-|---|---|---|
-| `POST` | `/signup` | Create an account, returns `{ token, user }` |
-| `POST` | `/login` | Log in, returns `{ token, user }` |
-| `GET` | `/me` | Current user |
-
-### Exams: `/api/exams`
-| Method | Route | Description |
-|---|---|---|
-| `POST` | `/parse` | Multipart upload (`file`) returning AI-parsed draft questions and a `usedFallback` flag |
-| `POST` | `/` | Save a reviewed exam |
-| `GET` | `/` | List your exams (summary + last result id) |
-| `GET` | `/:examId/edit` | Load an exam in editor shape |
-| `PUT` | `/:examId` | Update an exam, preserving existing IDs |
-| `DELETE` | `/:examId` | Delete an exam **and** all its attempts and results |
-| `GET` | `/:examId/results` | Owner view: all student attempts with scores and integrity flags |
-
-### Attempts: `/api/attempts`
-| Method | Route | Description |
-|---|---|---|
-| `POST` | `/:examId/start` | Start or resume an attempt. Returns the sanitized exam (no answer key) |
-| `POST` | `/:attemptId/section/:sectionId/start` | Record the first open of a section (idempotent) |
-| `POST` | `/:attemptId/answer` | Save or update a single answer |
-| `POST` | `/:attemptId/integrity` | Log an integrity event |
-| `POST` | `/:attemptId/submit` | Finalize and grade the attempt |
-
-### Results: `/api/results`
-| Method | Route | Description |
-|---|---|---|
-| `GET` | `/:resultId` | Scorecard, full review with answers, and insights. Visible to the student or the exam owner only |
-
----
 
 ## 🧮 Grading rules
 
@@ -331,47 +226,6 @@ Fullscreen, focus tracking and shortcut blocking are **detection and deterrence,
 
 ---
 
-## 🗄️ Data model
-
-```mermaid
-erDiagram
-    USER ||--o{ EXAM : owns
-    USER ||--o{ ATTEMPT : takes
-    EXAM ||--o{ ATTEMPT : "attempted as"
-    ATTEMPT ||--|| RESULT : "graded into"
-
-    USER {
-        string name
-        string email UK
-        string passwordHash
-    }
-    EXAM {
-        string title
-        string category
-        enum navigationMode "free | one-way"
-        bool restrictSectionNavigation
-        number totalDurationSeconds
-        array sections "title, durationSeconds, questions[]"
-    }
-    ATTEMPT {
-        date startedAt
-        map answers "questionId -> selection + status"
-        array questionOrder "per-section shuffle"
-        map optionOrders "per-question shuffle"
-        map sectionStartedAt
-        date submittedAt
-        bool autoSubmitted
-        array integrityEvents "type + timestamp"
-    }
-    RESULT {
-        number totalScore
-        number maxPossibleScore
-        number correctCount
-        number wrongCount
-        number skippedCount
-        array sectionScores
-    }
-```
 
 Questions are embedded in sections inside the `Exam` document: `type` (`mcq | msq | numerical`), `text`, optional base64 `imageData`, `options[]`, `correctOptionIds[]`, `correctNumericalAnswer`, and `positiveMarks` / `negativeMarks`.
 
@@ -390,31 +244,7 @@ Questions are embedded in sections inside the `Exam` document: `type` (`mcq | ms
 
 ---
 
-## ⚠️ Known limitations & roadmap
 
-Being upfront about what this version does *not* do yet:
-
-- [ ] **Server-side time enforcement.** Timers and the 3-strike rule currently run in the client, with the server recording start times and events. Rejecting answers or submits past the deadline, and enforcing strikes server-side, would harden this.
-- [ ] **Roles and exam access control.** Any registered user can start any exam by ID, and "owner" simply means the creator. Invite links, enrolment lists or an explicit student role would fit here.
-- [ ] **Rate limiting and security headers** (e.g. `express-rate-limit`, `helmet`) on auth and AI-parse endpoints.
-- [ ] **Token storage.** The JWT is held in `localStorage`. Moving to httpOnly cookies would reduce XSS exposure.
-- [ ] **Legacy `.doc` files.** The upload filter accepts them, but the parser (`mammoth`) targets `.docx`.
-- [ ] **Regex fallback** only detects MCQ/MSQ, because typed-answer questions need AI.
-- [ ] **Image storage** is base64 inside MongoDB documents. Object storage (S3 or similar) would scale better.
-- [ ] **Automated tests and CI.**
-- [ ] Ideas: PDF export of results, question banks, partial credit for MSQ, per-student analytics trends, webcam proctoring (opt-in).
-
----
-
-## 🤝 Contributing
-
-1. Fork the repo and create a feature branch: `git checkout -b feature/amazing-idea`
-2. Commit your changes with a clear message
-3. Push the branch and open a Pull Request
-
-Please don't commit `.env` files or API keys. They're already in `.gitignore`.
-
----
 
 <div align="center">
 

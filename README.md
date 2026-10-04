@@ -7,6 +7,7 @@
 
 **Turn a question-paper PDF or Word file into a secure, timed, auto-graded online exam, with post-exam analytics included.**
 
+
 ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)
@@ -15,10 +16,22 @@
 ![Gemini](https://img.shields.io/badge/AI-Gemini_%C2%B7?logo=googlegemini&logoColor=white)
 ![Auth](https://img.shields.io/badge/Auth-JWT_%2B_bcrypt-black?logo=jsonwebtokens)
 
+<p align="center"> <a href="https://exora-frontend.onrender.com"><b>🌐 Live Demo</b></a> &nbsp;·&nbsp; <a href="https://exora-backend-aj9y.onrender.com/api/health"></p>
+
 [Features](#-features) · [How it works](#-how-it-works) · [Architecture](#-architecture) · [Quick start](#-quick-start) · [API](#-api-reference) · [Security model](#-security-model) · [Roadmap](#-known-limitations--roadmap)
 
 </div>
 
+---
+ 
+## 🌐 Live Demo
+ 
+| Service | URL |
+|---|---|
+| **Frontend (web app)** | https://exora-frontend.onrender.com |
+| **Backend (REST API)** | https://exora-backend-aj9y.onrender.com |
+ 
+> ⏳ Hosted on Render. If the app hasn't been used for a while, the first request may take up to a minute while the server wakes up. Later requests are fast.
 ---
 
 ## Why EXORA?

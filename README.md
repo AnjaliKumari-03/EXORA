@@ -12,7 +12,7 @@
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-Express_4-339933?logo=nodedotjs&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose_8-47A248?logo=mongodb&logoColor=white)
-![Gemini](https://img.shields.io/badge/AI-Gemini_%C2%B7_Groq_%C2%B7_Mistral-8E75B2?logo=googlegemini&logoColor=white)
+![Gemini](https://img.shields.io/badge/AI-Gemini_%C2%B7?logo=googlegemini&logoColor=white)
 ![Auth](https://img.shields.io/badge/Auth-JWT_%2B_bcrypt-black?logo=jsonwebtokens)
 
 [Features](#-features) · [How it works](#-how-it-works) · [Architecture](#-architecture) · [Quick start](#-quick-start) · [API](#-api-reference) · [Security model](#-security-model) · [Roadmap](#-known-limitations--roadmap)

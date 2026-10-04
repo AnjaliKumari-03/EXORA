@@ -98,8 +98,8 @@ Preparing an online mock test usually means retyping hundreds of questions into 
                           ┌───────────────────────────────────────────┼─────────────────────┐
                           ▼                                           ▼                     ▼
                   ┌──────────────┐                         ┌────────────────────┐   ┌──────────────┐
-                  │   MongoDB    │                         │ MuPDF · pdf-parse  │   │ Gemini → Groq│
-                  │ User · Exam  │                         │ mammoth (parsing)  │   │ → Mistral    │
+                  │   MongoDB    │                         │ MuPDF · pdf-parse  │   │ Gemini       │
+                  │ User · Exam  │                         │ mammoth (parsing)  │   │              │
                   │ Attempt·Result│                        └────────────────────┘   └──────────────┘
                   └──────────────┘
 ```
@@ -112,7 +112,7 @@ Preparing an online mock test usually means retyping hundreds of questions into 
 | **Backend** | Node.js (ES modules), Express 4, Mongoose 8, Multer (memory storage), CORS |
 | **Auth** | JSON Web Tokens (7-day expiry), bcryptjs (10 rounds) |
 | **Document parsing** | MuPDF (page rendering + structured text), `pdf-parse`, `mammoth` (Word) |
-| **AI** | Google Gemini (primary), Groq (Llama 4 vision), Mistral (Pixtral). All use free tiers |
+| **AI** | Google Gemini (primary). Use free tiers |
 | **Database** | MongoDB (Atlas-ready) |
 
 ### Project structure
@@ -145,7 +145,7 @@ secure-exam-platform/
         ├── models/                  # User, Exam, Attempt, Result
         ├── middleware/              # JWT auth, multer upload, JSON error handler
         ├── services/
-        │   ├── aiQuestionExtractorService.js   # Gemini → Groq → Mistral failover
+        │   ├── aiQuestionExtractorService.js   # Gemini 
         │   ├── pdfToImagesService.js           # MuPDF: page PNG + text, paired per page
         │   ├── pdfBatchExtractionService.js    # batching + bounded concurrency
         │   ├── questionNormalization.js        # extraction prompt + schema normalizer
@@ -165,7 +165,7 @@ secure-exam-platform/
 ### Prerequisites
 - **Node.js 18+** (uses the built-in `fetch`)
 - A **MongoDB** connection string ([MongoDB Atlas](https://www.mongodb.com/atlas) free tier works)
-- A free **Gemini API key** from [Google AI Studio](https://aistudio.google.com/apikey) (no card required)
+- A free **Gemini API key** from [Google AI Studio](https://aistudio.google.com/apikey) 
 
 ### 1. Backend
 

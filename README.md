@@ -34,8 +34,8 @@ Preparing an online mock test usually means retyping hundreds of questions into 
 ### 🧠 AI-powered exam creation
 - **Upload PDF or Word** question papers (up to 10 MB).
 - **Multimodal extraction.** Each PDF page is rendered to a 2× PNG *and* its text is extracted, then both are sent to the model. The images are the source of truth for tables, diagrams and superscripts, and the text confirms exact wording.
-- **Three-tier AI failover:** Gemini → Groq → Mistral. Each provider has its own model-candidate list and moves to the next model on `429 / 503 / 404`. Groq and Mistral are optional and silently skipped if no key is set.
-- **Regex fallback parser** if every AI tier fails, so an upload never dead-ends. The UI shows a warning banner when this happens.
+- **AI:** Gemini. The provider has its own model-candidate list and moves to the next model on `429 / 503 / 404`. 
+- **Regex fallback parser** if AI tier fails, so an upload never dead-ends. The UI shows a warning banner when this happens.
 - **Batched, concurrent processing.** Large PDFs (up to 300 pages) are split into 8-page batches and processed 3 at a time, which avoids silent truncation and keeps wall-clock time reasonable.
 - **Answer detection.** If the paper contains inline answers, bold or marked options, or an answer key, the correct options are pre-filled. If the answer can't be determined, the field is left empty rather than guessed.
 - **Tree/graph aware.** The extraction prompt forces explicit parent→child lines, so a tree diagram never becomes an ambiguous list of numbers.
